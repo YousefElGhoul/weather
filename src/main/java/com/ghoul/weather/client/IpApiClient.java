@@ -24,4 +24,3 @@ public class IpApiClient {
                 .body(IpApiResponse.class);
     }
 }
-

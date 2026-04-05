@@ -20,22 +20,26 @@ public class WeatherController {
     @ResponseBody
     @GetMapping(path = "/mini-weather")
     public MiniWeatherResponse getMiniWeather(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null) {
-            ip = request.getRemoteAddr();
-        }
+        String forwardedFor = request.getHeader("X-Forwarded-For");
+        String remoteAddr = request.getRemoteAddr();
 
+        System.out.println("X-Forwarded-For: " + forwardedFor);
+        System.out.println("RemoteAddr: " + remoteAddr);
+
+        String ip = forwardedFor != null ? forwardedFor : remoteAddr;
         return weatherService.getMiniWeather(ip);
     }
 
     @ResponseBody
     @GetMapping(path = "/weather")
     public WeatherResponse getWeather(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null) {
-            ip = request.getRemoteAddr();
-        }
+        String forwardedFor = request.getHeader("X-Forwarded-For");
+        String remoteAddr = request.getRemoteAddr();
 
+        System.out.println("X-Forwarded-For: " + forwardedFor);
+        System.out.println("RemoteAddr: " + remoteAddr);
+
+        String ip = forwardedFor != null ? forwardedFor : remoteAddr;
         return weatherService.getWeather(ip);
     }
 

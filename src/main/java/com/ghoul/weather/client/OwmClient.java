@@ -9,13 +9,13 @@ import org.springframework.web.client.RestClient;
 
 @Component
 public class OwmClient {
-    @Value("${owm.api-key}")
-    private String apiKey;
-
+    private final String apiKey;
     private final RestClient restClient;
 
-    public OwmClient(@Qualifier("owmRestClient") RestClient restClient) {
+    public OwmClient(@Qualifier("owmRestClient") RestClient restClient,
+                     @Value("${owm.api-key}") String apiKey) {
         this.restClient = restClient;
+        this.apiKey = apiKey;
     }
 
     public OWMResponse getOwmResponse(Geolocation geolocation) {
