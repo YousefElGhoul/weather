@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for ghoul-weather on 2026-04-05T18:23:25+02:00
+# fly.toml app configuration file generated for ghoul-weather on 2026-04-05T17:21:16Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -7,7 +7,6 @@ app = 'ghoul-weather'
 primary_region = 'cdg'
 
 [build]
-builder = "paketobuildpacks/builder-jammy-base"
 
 [http_service]
   internal_port = 8080
@@ -19,5 +18,6 @@ builder = "paketobuildpacks/builder-jammy-base"
 
 [[vm]]
   memory = '1gb'
+  cpu_kind = 'shared'
   cpus = 1
   memory_mb = 1024
