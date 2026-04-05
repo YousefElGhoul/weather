@@ -44,7 +44,7 @@ public class WeatherController {
     }
 
     @ResponseBody
-    @GetMapping(path = "/test")
+    @GetMapping(path = "/")
     public String test() {
         return "This is a Test";
     }
