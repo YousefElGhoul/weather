@@ -1,6 +1,8 @@
 package com.ghoul.weather.services;
 
 import com.ghoul.weather.client.OwmClient;
+import com.ghoul.weather.mappers.DescriptionMapper;
+import com.ghoul.weather.mappers.FlagMapper;
 import com.ghoul.weather.model.dto.*;
 import com.ghoul.weather.model.external.owm.OWMResponse;
 import org.springframework.stereotype.Service;
@@ -20,8 +22,8 @@ public class WeatherService {
 
     private TodayWeather getCurrentWeather(OWMResponse response) {
         return new TodayWeather(
-                response.getCurrent().getWeather().getFirst().getIcon(),
-                response.getCurrent().getWeather().getFirst().getDescription(),
+                DescriptionMapper.getConditionIcon(response.getCurrent().getWeather().getFirst().getIcon()),
+                DescriptionMapper.formatDescription(response.getCurrent().getWeather().getFirst().getDescription()),
                 new Temperature(
                         response.getCurrent().getTemp(),
                         response.getCurrent().getFeelsLike(),
@@ -38,10 +40,12 @@ public class WeatherService {
     private List<ForecastWeather> getForecast(OWMResponse response) {
         List<ForecastWeather> forecast = new ArrayList<>();
 
-        for (int i = 1; i <= 7; i++) {
+        forecast.add(null);
+
+        for (int i = 1; i <= 6; i++) {
             forecast.add(new ForecastWeather(
-                    response.getDaily().get(i).getWeather().getFirst().getIcon(),
-                    response.getDaily().get(i).getWeather().getFirst().getDescription(),
+                    DescriptionMapper.getConditionIcon(response.getDaily().get(i).getWeather().getFirst().getIcon()),
+                    DescriptionMapper.formatDescription(response.getDaily().get(i).getWeather().getFirst().getDescription()),
                     new Temperature(
                             response.getDaily().get(i).getTemp().getHigh(),
                             response.getDaily().get(i).getFeelsLike().getEvening(),
@@ -60,9 +64,19 @@ public class WeatherService {
 
         return new WeatherResponse(
                 geolocation.city(),
-                geolocation.countryCode(),
+                FlagMapper.getFlag(geolocation.countryCode()),
                 getCurrentWeather(response),
                 getForecast(response)
+        );
+    }
+
+    public MiniWeatherResponse getMiniWeather(String ip) {
+        Geolocation geolocation = geolocationService.getLocation(ip);
+        OWMResponse response =  owmClient.getOwmResponse(geolocation);
+
+        return new MiniWeatherResponse(
+                DescriptionMapper.formatDescription(response.getCurrent().getWeather().getFirst().getDescription()),
+                response.getCurrent().getTemp()
         );
     }
 

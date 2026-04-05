@@ -1,9 +1,7 @@
 package com.ghoul.weather.client;
 
 import com.ghoul.weather.model.dto.Geolocation;
-import com.ghoul.weather.model.external.ipapi.IpApiResponse;
 import com.ghoul.weather.model.external.owm.OWMResponse;
-import com.ghoul.weather.services.GeolocationService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

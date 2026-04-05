@@ -1,9 +1,7 @@
 package com.ghoul.weather.controllers;
 
-import com.ghoul.weather.model.dto.Geolocation;
 import com.ghoul.weather.model.dto.MiniWeatherResponse;
 import com.ghoul.weather.model.dto.WeatherResponse;
-import com.ghoul.weather.services.GeolocationService;
 import com.ghoul.weather.services.WeatherService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
@@ -27,7 +25,7 @@ public class WeatherController {
             ip = request.getRemoteAddr();
         }
 
-        return new MiniWeatherResponse("Clear Sky", 25.0);
+        return weatherService.getMiniWeather(ip);
     }
 
     @ResponseBody
