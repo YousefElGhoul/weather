@@ -5,11 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OWMCurrentWeather {
     private double temp;
     @JsonProperty("feels_like") private double feelsLike;
-    private OWMWeatherDescription weather;
+    private List<OWMWeatherDescription> weather;
 }

@@ -11,6 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OWMResponse {
-    @JsonProperty("current") private OWMCurrentWeather OWMCurrentWeather;
+    @JsonProperty("current") private OWMCurrentWeather current;
     @JsonProperty("daily") private List<OWMDailyItem> daily;
 }

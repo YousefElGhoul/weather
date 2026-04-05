@@ -1,6 +1,5 @@
 package com.ghoul.weather.client;
 
-import com.ghoul.weather.exceptions.IpResolutionException;
 import com.ghoul.weather.model.external.ipapi.IpApiResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,7 @@ public class IpApiClient {
         this.restClient = restClient;
     }
 
-    public IpApiResponse getLocation(String ip) {
+    public IpApiResponse getUserLocation(String ip) {
         if (ip.equals("127.0.0.1") || ip.equals("0:0:0:0:0:0:0:1")) {
             ip = "156.223.172.35"; // fallback test IP for local dev
         }
