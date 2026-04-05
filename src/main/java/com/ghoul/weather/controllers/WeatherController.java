@@ -26,7 +26,11 @@ public class WeatherController {
         System.out.println("X-Forwarded-For: " + forwardedFor);
         System.out.println("RemoteAddr: " + remoteAddr);
 
-        String ip = forwardedFor != null ? forwardedFor : remoteAddr;
+        String ip = forwardedFor != null
+                ? forwardedFor.split(",")[0].trim()
+                : remoteAddr;
+
+        System.out.println("IP: " + ip);
         return weatherService.getMiniWeather(ip);
     }
 
@@ -36,10 +40,13 @@ public class WeatherController {
         String forwardedFor = request.getHeader("X-Forwarded-For");
         String remoteAddr = request.getRemoteAddr();
 
+        String ip = forwardedFor != null
+                ? forwardedFor.split(",")[0].trim()
+                : remoteAddr;
+
         System.out.println("X-Forwarded-For: " + forwardedFor);
         System.out.println("RemoteAddr: " + remoteAddr);
 
-        String ip = forwardedFor != null ? forwardedFor : remoteAddr;
         return weatherService.getWeather(ip);
     }
 
