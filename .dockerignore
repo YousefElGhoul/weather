@@ -72,12 +72,6 @@ Dockerfile
 .dockerignore
 docker-compose*.yml
 
-# Render blueprint
-render.yaml
-
-# Fly.io
-fly.toml
-
 # Environment files
 .env
 .env.*
