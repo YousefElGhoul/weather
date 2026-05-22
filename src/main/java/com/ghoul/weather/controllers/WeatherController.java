@@ -6,9 +6,11 @@ import com.ghoul.weather.services.WeatherService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
+@RequestMapping("/api/v1")
 public class WeatherController {
 
     private final WeatherService weatherService;
@@ -35,7 +37,7 @@ public class WeatherController {
     }
 
     @ResponseBody
-    @GetMapping(path = "/weather")
+    @GetMapping(path = "/full-weather")
     public WeatherResponse getWeather(HttpServletRequest request) {
         String forwardedFor = request.getHeader("X-Forwarded-For");
         String remoteAddr = request.getRemoteAddr();
@@ -51,7 +53,7 @@ public class WeatherController {
     }
 
     @ResponseBody
-    @GetMapping(path = "/")
+    @GetMapping(path = "/test-header")
     public String test() {
         return "This is a Test";
     }
