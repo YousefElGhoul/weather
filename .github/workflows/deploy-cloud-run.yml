@@ -51,6 +51,6 @@ jobs:
           service: ${{ secrets.CLOUD_RUN_SERVICE_NAME }}
           region: ${{ env.REGION }}
           image: ${{ env.IMAGE }}
-          port: 8080
+          port: --allow-unauthenticated 8080
           env_vars: |
             OWM_API_KEY=${{ secrets.OWM_API_KEY }}
