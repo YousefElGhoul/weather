@@ -52,6 +52,5 @@ jobs:
           region: ${{ env.REGION }}
           image: ${{ env.IMAGE }}
           port: 8080
-          no-allow-unauthenticated: false
           env_vars: |
             OWM_API_KEY=${{ secrets.OWM_API_KEY }}
