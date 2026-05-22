@@ -7,7 +7,7 @@
 #   WIF_SERVICE_ACCOUNT     - Workload Identity Federation service account email
 #
 # App secrets (add as many as your application needs):
-#   OWM_API_KEY             - OpenWeatherMap API key\
+#   OWM_API_KEY             - OpenWeatherMap API key
 
 name: Build and Deploy to Cloud Run
 
@@ -54,4 +54,4 @@ jobs:
           port: 8080
           no-allow-unauthenticated: false
           env_vars: |
-            OWM_API_KEY=${{ secrets.OWM_API_KEY }}\
+            OWM_API_KEY=${{ secrets.OWM_API_KEY }}
