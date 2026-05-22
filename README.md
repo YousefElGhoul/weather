@@ -16,7 +16,7 @@ A Spring Boot REST API that serves as a backend for the [Weather](https://yousef
 
 Interactive API documentation is available via Swagger UI:
 
-- **Production:** [https://weather-api.yousefelghoul.me//swagger-ui/index.html](https://weather-api.yousefelghoul.me//swagger-ui/index.html)
+- **Production:** [https://weather-api.yousefelghoul.me/swagger-ui/index.html](https://weather-api.yousefelghoul.me//swagger-ui/index.html)
 - **Local:** [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
 The OpenAPI 3 spec is also available at `/v3/api-docs`.
