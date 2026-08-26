@@ -1,13 +1,16 @@
 package com.ghoul.weather.config;
 
-import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
+import java.time.Duration;
+
 @Configuration
+@EnableConfigurationProperties(OwmProperties.class)
 public class RestClientConfig {
 
     @Value("${owm.base-url}")
@@ -15,6 +18,12 @@ public class RestClientConfig {
 
     @Value("${ipapi.base-url}")
     private String ipapiBaseUrl;
+
+    @Value("${external-api.connect-timeout:3s}")
+    private Duration connectTimeout;
+
+    @Value("${external-api.read-timeout:5s}")
+    private Duration readTimeout;
 
     @Bean
     public RestClient owmRestClient() {
@@ -26,20 +35,14 @@ public class RestClientConfig {
         return getRestClient(ipapiBaseUrl);
     }
 
-    @NonNull
     private RestClient getRestClient(String baseUrl) {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(connectTimeout);
+        requestFactory.setReadTimeout(readTimeout);
+
         return RestClient.builder()
                 .baseUrl(baseUrl)
-                .requestInterceptor((request, body, execution) -> {
-                    System.out.println(">>> Method : " + request.getMethod());
-                    System.out.println(">>> URL    : " + request.getURI());
-                    System.out.println(">>> Headers: " + request.getHeaders());
-
-                    ClientHttpResponse response = execution.execute(request, body);
-
-                    System.out.println("<<< Status : " + response.getStatusCode());
-                    return response;
-                })
+                .requestFactory(requestFactory)
                 .build();
     }
 }

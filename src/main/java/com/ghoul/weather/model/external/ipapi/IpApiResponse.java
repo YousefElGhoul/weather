@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class IpApiResponse {
     private String status;
+    private String message;
     private String countryCode;
     private String city;
     private double lat;

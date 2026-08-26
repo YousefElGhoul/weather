@@ -5,6 +5,7 @@ import com.ghoul.weather.mappers.DescriptionMapper;
 import com.ghoul.weather.mappers.FlagMapper;
 import com.ghoul.weather.model.dto.*;
 import com.ghoul.weather.model.external.owm.OWMResponse;
+import com.ghoul.weather.exceptions.InvalidExternalResponseException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -40,8 +41,6 @@ public class WeatherService {
     private List<ForecastWeather> getForecast(OWMResponse response) {
         List<ForecastWeather> forecast = new ArrayList<>();
 
-        forecast.add(null);
-
         for (int i = 1; i <= 6; i++) {
             forecast.add(new ForecastWeather(
                     DescriptionMapper.getConditionIcon(response.getDaily().get(i).getWeather().getFirst().getIcon()),
@@ -61,6 +60,7 @@ public class WeatherService {
     public WeatherResponse getWeather(String ip) {
         Geolocation geolocation = geolocationService.getLocation(ip);
         OWMResponse response =  owmClient.getOwmResponse(geolocation);
+        validateWeatherResponse(response);
 
         return new WeatherResponse(
                 geolocation.city(),
@@ -73,11 +73,23 @@ public class WeatherService {
     public MiniWeatherResponse getMiniWeather(String ip) {
         Geolocation geolocation = geolocationService.getLocation(ip);
         OWMResponse response =  owmClient.getOwmResponse(geolocation);
+        validateWeatherResponse(response);
 
         return new MiniWeatherResponse(
                 DescriptionMapper.formatDescription(response.getCurrent().getWeather().getFirst().getDescription()),
                 response.getCurrent().getTemp()
         );
+    }
+
+    private void validateWeatherResponse(OWMResponse response) {
+        if (response == null || response.getCurrent() == null || response.getCurrent().getWeather() == null
+                || response.getCurrent().getWeather().isEmpty() || response.getCurrent().getWeather().getFirst() == null
+                || response.getDaily() == null
+                || response.getDaily().size() < 7 || response.getDaily().stream().anyMatch(day -> day == null
+                || day.getTemp() == null || day.getFeelsLike() == null || day.getWeather() == null || day.getWeather().isEmpty()
+                || day.getWeather().getFirst() == null)) {
+            throw new InvalidExternalResponseException("Weather provider returned incomplete forecast data");
+        }
     }
 
 }

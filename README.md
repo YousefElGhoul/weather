@@ -1,126 +1,91 @@
 # Weather API
 
-A Spring Boot REST API that serves as a backend for the [Weather](https://yousefelghoul.gitlab.io/weather) frontend. It automatically detects the user's location from their IP address and returns a 7-day weather forecast.
+A production-minded Spring Boot API for a weather UI. It resolves the caller's approximate location from their network address, retrieves current conditions and a six-day forecast, and returns a frontend-friendly JSON response.
 
-**Base URL:** `https://weather-api.yousefelghoul.me/` (production) / `http://localhost:8080` (local)
+## Highlights
 
-## Features
+- IP-based approximate geolocation through ip-api.com and weather from OpenWeatherMap One Call API 3.0
+- Current conditions plus a six-day forecast in metric units
+- Consistent JSON errors for invalid client data, provider failures, timeouts, and unexpected errors
+- Bounded, 10-minute in-memory cache for successful weather-provider responses; it never stores client IPs
+- OpenAPI documentation, Swagger UI, unit tests, and MVC tests that never call external providers
 
-- **Automatic geolocation** — detects the user's location from their IP using ip-api.com, no input required
-- **7-day forecast** — fetches daily weather data from OpenWeatherMap One Call API 3.0
-- **Today's detailed breakdown** — returns midnight, morning, noon, and evening temperatures for the current day
-- **Custom weather conditions** — maps OWM condition codes to Font Awesome icons and human-readable descriptions
-- **Deployed on Google Cloud Run using GitHub Actions**
+## Architecture
 
-## Documentation
+`WeatherController` obtains the address exposed by Spring's forwarded-header support and delegates to `WeatherService`. The service uses `GeolocationService` and the two HTTP clients, validates provider payloads, then maps provider DTOs to public API DTOs. Successful OpenWeatherMap payloads are cached locally by rounded coordinates. Entries expire after 10 minutes and are limited to 1,000.
 
-Interactive API documentation is available via Swagger UI:
+## Requirements and local setup
 
-- **Production:** [https://weather-api.yousefelghoul.me/swagger-ui/index.html](https://weather-api.yousefelghoul.me//swagger-ui/index.html)
-- **Local:** [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+- Java 21
+- An OpenWeatherMap One Call API 3.0 key
 
-The OpenAPI 3 spec is also available at `/v3/api-docs`.
+The application uses Spring Boot **4.0.5**, Java 21, Maven, Spring MVC, Spring Cache/Caffeine, and springdoc-openapi 3.0.2.
 
-## Endpoints
+```bash
+cp .env.example .env
+set -a; source .env; set +a
+./mvnw spring-boot:run
+```
 
-All endpoints are prefixed with `/api/v1` and accept `GET` requests only.
+| Variable | Required | Description |
+|---|---:|---|
+| `OWM_API_KEY` | Yes | OpenWeatherMap One Call API 3.0 key |
+
+`OWM_API_KEY` is intentionally not stored in source control. `.env` is ignored by Git and only helps export it locally. Local loopback requests do not represent a public location; use a real client/proxy address when manually exercising geolocation.
+
+## API documentation
+
+- Swagger UI: [`/swagger-ui/index.html`](http://localhost:8080/swagger-ui/index.html)
+- OpenAPI document: [`/v3/api-docs`](http://localhost:8080/v3/api-docs)
+
+All public endpoints are `GET` endpoints under `/api/v1`.
 
 | Endpoint | Description |
 |---|---|
-| `GET /api/v1/full-weather` | Full weather data for the caller's location: city, today's detailed weather, and 6-day forecast |
-| `GET /api/v1/mini-weather` | Lightweight current conditions: description and current temperature only |
-| `GET /api/v1/test-header` | Health-check endpoint, returns `"This is a Test"` |
+| `/api/v1/mini-weather` | Current temperature and condition for the caller's approximate location |
+| `/api/v1/full-weather` | Current details plus six forecast days for the caller's approximate location |
 
-### `GET /api/v1/full-weather`
-
-Returns a complete weather report for the requester's location.
-
-**Response `200 OK`**
+```bash
+curl http://localhost:8080/api/v1/mini-weather
+```
 
 ```json
-{
-  "city": "Cairo",
-  "country_code": "fi fi-eg",
-  "today": {
-    "icon_code": "fa-regular fa-sun",
-    "description": "Clear Sky",
-    "temp": {
-      "temp": 28.5,
-      "feels_like": 27.2,
-      "low": 22.1,
-      "high": 31.3
-    },
-    "midnight": 22.1,
-    "morning": 24.3,
-    "noon": 31.3,
-    "evening": 28.5
-  },
-  "forecast": [
-    {
-      "icon_code": "fa-regular fa-sun",
-      "description": "Clear Sky",
-      "temperature": {
-        "temp": 27.8,
-        "feels_like": 26.5,
-        "low": 21.4,
-        "high": 30.1
-      }
-    }
-  ]
-}
+{"description":"Clear Sky","temperature":28.5}
 ```
 
-The `forecast` array contains 6 entries (days 2–7), each with an `icon_code`, `description`, and `temperature` object.
-
-### `GET /api/v1/mini-weather`
-
-Returns a minimal current-conditions response.
-
-**Response `200 OK`**
+Error responses have one consistent shape:
 
 ```json
-{
-  "description": "Clear Sky",
-  "temperature": 28.5
-}
+{"timestamp":"2026-08-26T15:00:00Z","status":504,"error":"Upstream timeout","message":"The weather provider did not respond in time.","path":"/api/v1/mini-weather"}
 ```
 
-### `GET /api/v1/test-header`
+| Status | Meaning |
+|---:|---|
+| 200 | Weather response returned |
+| 400 | Missing or invalid client address |
+| 502 | A provider returned an invalid response or failed |
+| 504 | A provider did not respond before the configured timeout |
+| 500 | Unexpected server error |
 
-Simple health-check endpoint.
+## Tests
 
-**Response `200 OK`**
-
-```
-This is a Test
-```
-
-## Errors
-
-Errors are returned as JSON with the following structure:
-
-```json
-{
-  "error": "Bad Gateway",
-  "message": "Failed to resolve IP location"
-}
+```bash
+./mvnw verify
 ```
 
-| HTTP Status | Condition |
-|---|---|
-| `502 Bad Gateway` | IP geolocation failed |
-| `404 Not Found` | OpenWeatherMap returned 404 (e.g. invalid coordinates) |
-| `503 Service Unavailable` | OpenWeatherMap server error |
-| `500 Internal Server Error` | Unexpected error |
+Tests mock service/provider boundaries and require neither an API key nor network access.
 
-## Tech Stack
+## Docker
 
-- **Java 21** with **Spring Boot 3**
-- **Maven** build system
-- **Springdoc OpenAPI** for Swagger UI documentation
+```bash
+docker build -t weather-api .
+docker run --rm -p 8080:8080 -e OWM_API_KEY=your-key weather-api
+```
 
-## Notes
+The image runs as a non-root `spring` user. Its build stage executes the test suite before producing the runtime image.
 
-- The API uses [ip-api.com](http://ip-api.com) for geolocation, which is approximate so accuracy varies by ISP and region
-- Using a VPN will result in inaccurate weather data as the detected location will reflect the VPN server's location, not the user's
-- API keys are injected via environment variables (`OWM_API_KEY`)
+## CI and deployment
+
+GitHub Actions runs `./mvnw -B verify` before Cloud Run authentication, image push, or deployment. Deployment uses Workload Identity Federation and requires `GCP_PROJECT_ID`, `GAR_REPOSITORY`, `CLOUD_RUN_SERVICE_NAME`, `WIF_PROVIDER`, `WIF_SERVICE_ACCOUNT`, and `OWM_API_KEY` GitHub secrets. A deployment succeeds only when Cloud Run accepts the built image.
+
+Geolocation is approximate and can reflect VPN or ISP routing. CORS defaults target the existing frontend and local development; adjust them for another frontend domain.

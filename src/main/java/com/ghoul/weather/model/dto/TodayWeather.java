@@ -3,7 +3,7 @@ package com.ghoul.weather.model.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record TodayWeather(
-        @JsonProperty("icon_code") String iconCode,
+        @JsonProperty("icon_code") String w,
         String description,
         @JsonProperty("temp") Temperature temperature,
         @JsonProperty("midnight") Double midnightTemp,

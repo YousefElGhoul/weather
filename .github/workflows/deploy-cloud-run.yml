@@ -23,7 +23,26 @@ env:
   IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GAR_REPOSITORY }}/weather-api:${{ github.sha }}
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Run tests
+        run: ./mvnw -B verify
+
   deploy:
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -51,6 +70,7 @@ jobs:
           service: ${{ secrets.CLOUD_RUN_SERVICE_NAME }}
           region: ${{ env.REGION }}
           image: ${{ env.IMAGE }}
-          port: --allow-unauthenticated 8080
+          flags: --allow-unauthenticated
+          port: 8080
           env_vars: |
             OWM_API_KEY=${{ secrets.OWM_API_KEY }}
