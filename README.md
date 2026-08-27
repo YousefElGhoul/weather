@@ -86,6 +86,6 @@ The image runs as a non-root `spring` user. Its build stage executes the test su
 
 ## CI and deployment
 
-GitHub Actions runs `./mvnw -B verify` before Cloud Run authentication, image push, or deployment. Deployment uses Workload Identity Federation and requires `GCP_PROJECT_ID`, `GAR_REPOSITORY`, `CLOUD_RUN_SERVICE_NAME`, `WIF_PROVIDER`, `WIF_SERVICE_ACCOUNT`, and `OWM_API_KEY` GitHub secrets. A deployment succeeds only when Cloud Run accepts the built image.
+GitHub Actions runs `./mvnw -B verify`, builds the image, and pushes it to the public Docker Hub repository `<DOCKERHUB_USERNAME>/weather-api` before deploying it to Cloud Run. The workflow requires `GCP_PROJECT_ID`, `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, `CLOUD_RUN_SERVICE_NAME`, `WIF_PROVIDER`, `WIF_SERVICE_ACCOUNT`, and `OWM_API_KEY` GitHub secrets. `DOCKERHUB_TOKEN` should be a Docker Hub access token with write access to the repository; do not use an account password. Deployment to Cloud Run continues to use Workload Identity Federation, with `GCP_PROJECT_ID` explicitly selecting the target project.
 
 Geolocation is approximate and can reflect VPN or ISP routing. CORS defaults target the existing frontend and local development; adjust them for another frontend domain.
