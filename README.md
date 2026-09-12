@@ -23,7 +23,7 @@ portfolio:
     - GitHub Actions
     - Google Cloud Run
 
-  live: null
+  live: "https://weather-api.yousefelghoul.me/swagger-ui.html"
   slug: "weather-api"
 ---
 -->
