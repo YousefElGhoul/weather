@@ -1,3 +1,33 @@
+<!--
+---
+portfolio:
+  title: "Weather API"
+  subtitle: "Location-Aware Weather Backend"
+  type: 
+    - Backend
+  status: "Maintained"
+  time: "2026"
+
+  description: "A Spring Boot weather service that resolves approximate client location, retrieves current conditions and forecasts from external providers, and exposes a frontend-friendly REST API with caching and structured error handling."
+
+  skills:
+    - Java
+    - Spring Boot
+    - Spring MVC
+    - REST APIs
+    - Caffeine
+    - External APIs
+    - OpenAPI
+    - Docker
+    - JUnit
+    - GitHub Actions
+    - Google Cloud Run
+
+  live: null
+  slug: "weather-api"
+---
+-->
+
 # Weather API
 
 A production-minded Spring Boot API for a weather UI. It resolves the caller's approximate location from their network address, retrieves current conditions and a six-day forecast, and returns a frontend-friendly JSON response.
