@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Weather</title>
+    <script src="https://kit.fontawesome.com/ca7138c89a.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/6.6.6/css/flag-icons.min.css">
+    <script src="time.js"></script>
+    <script src="dates.js"></script>
+    <script src="api.js" defer></script>
+    <link href="resources/favicon.png" rel="icon" type="image/x-icon"/>
+    <link href="global.css" rel="stylesheet"/>
+    <link href="style.css" rel="stylesheet"/>
+</head>
+<body>
+    <div class="container">
+        <nav class="header">
+            <a href="https://www.youtube.com/feed/subscriptions" target="_blank">
+                <i class="fa-brands fa-youtube"></i>
+            </a>
+            <a href="https://claude.ai/" target="_blank">
+                <i class="fa-brands fa-claude"></i>
+            </a>
+            <a href="https://github.com/" target="_blank">
+                <i class="fa-brands fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/" target="_blank">
+                <i class="fa-brands fa-linkedin"></i>
+            </a>
+            <a href="https://drive.google.com/drive/u/1/my-drive" target="_blank">
+                <i class="fa-brands fa-google-drive"></i>
+            </a>
+            <a href="https://www.icloud.com/" target="_blank">
+                <i class="fas fa-cloud"></i>
+            </a>
+        </nav>
+        <div class="top-container">
+            <div class="hello txt">
+                Welcome!
+            </div>
+
+            <div id="clock"></div>
+
+            <a href="../homepage" target="_self" class="home">
+                <i class="fas fa-home"></i>
+            </a>
+        </div>
+        <div class="bottom-container">
+            <div class="column today-column">
+                <div class="box today-box" id="date0-box">
+                    <div class="title txt">
+                        <span id="date0">Loading...</span>
+                    </div>
+                    <div class="weather-box">
+                        <div class="weather-icon">
+                            <i id="icon0" class="fa fa-spinner fa-spin"></i>
+                        </div>
+                        <div class="weather-description">
+                            <span id="weatherDescription0">Loading...</span>
+                        </div>
+                        <div class="weather-temperature">
+                            <span class="temp-texts main-temp">
+                                <span class="temp" id="temperature0">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>Feels Like: </span>
+                                <span>
+                                    <span id="feels-like0">Loading...</span>
+                                    <span> °C</span>
+                                </span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>L: </span>
+                                <span id="min-temp0">Loading...</span>
+                                <span> °C</span>
+                                <span>|</span>
+                                <span class="left-text">H: </span>
+                                <span id="max-temp0">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                        </div>
+                        <div class="divider divider1">
+                            <hr class="solid">
+                        </div>
+                        <div class="weather-temptimes">
+                            <span class="temp-texts">
+                                <span>Midnight: </span>
+                                <span class="temp-times" id="0000">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>Morning:  </span>
+                                <span class="temp-times" id="0600">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>Noon:     </span>
+                                <span class="temp-times" id="1200">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>Evening:  </span>
+                                <span class="temp-times" id="1800">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                        </div>
+                        <div class="divider divider2">
+                            <hr class="solid">
+                        </div>
+                        <div class="weather-info">
+                            <span>
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span>Location: </span>
+                                <span id="city">Loading</span>
+                                <span id="country" class="fa fa-spinner fa-spin"></span>
+                            </span>
+                        </div>
+                        <div class="disclaimer">
+                            <span>
+                                <i class="fa-solid fa-triangle-exclamation"></i> If used with a VPN, the weather would be very innacurate!
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column yesterday-column">
+                <div class="box yesterday-box" id="date1-box">
+                    <div class="title txt">
+                        <span id="date1">Loading...</span>
+                    </div>
+                    <div class="weather-box">
+                        <div class="weather-icon">
+                            <i id="icon1" class="fa fa-spinner fa-spin"></i>
+                        </div>
+                        <div class="weather-description">
+                            <span id="weatherDescription1">Loading...</span>
+                        </div>
+                        <div class="weather-temperature">
+                            <span class="temp-texts main-temp">
+                                <span class="temp" id="temperature1">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>Feels Like: </span>
+                                <span>
+                                    <span id="feels-like1">Loading...</span>
+                                    <span> °C</span>
+                                </span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>L: </span>
+                                <span id="min-temp1">Loading...</span>
+                                <span> °C</span>
+                                <span>|</span>
+                                <span class="left-text">H: </span>
+                                <span id="max-temp1">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="box day-box" id="date4-box">
+                    <div class="title txt">
+                        <span id="date4">Loading...</span>
+                    </div>
+                    <div class="weather-box">
+                        <div class="weather-icon">
+                            <i id="icon4" class="fa fa-spinner fa-spin"></i>
+                        </div>
+                        <div class="weather-description">
+                            <span id="weatherDescription4">Loading...</span>
+                        </div>
+                        <div class="weather-temperature">
+                            <span class="temp-texts main-temp">
+                                <span class="temp" id="temperature4">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>Feels Like: </span>
+                                <span>
+                                    <span id="feels-like4">Loading...</span>
+                                    <span> °C</span>
+                                </span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>L: </span>
+                                <span id="min-temp4">Loading...</span>
+                                <span> °C</span>
+                                <span>|</span>
+                                <span class="left-text">H: </span>
+                                <span id="max-temp4">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="box day-box" id="date2-box">
+                    <div class="title txt">
+                        <span id="date2">Loading...</span>
+                    </div>
+                    <div class="weather-box">
+                        <div class="weather-icon">
+                            <i id="icon2" class="fa fa-spinner fa-spin"></i>
+                        </div>
+                        <div class="weather-description">
+                            <span id="weatherDescription2">Loading...</span>
+                        </div>
+                        <div class="weather-temperature">
+                            <span class="temp-texts main-temp">
+                                <span class="temp" id="temperature2">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>Feels Like: </span>
+                                <span>
+                                    <span id="feels-like2">Loading...</span>
+                                    <span> °C</span>
+                                </span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>L: </span>
+                                <span id="min-temp2">Loading...</span>
+                                <span> °C</span>
+                                <span>|</span>
+                                <span class="left-text">H: </span>
+                                <span id="max-temp2">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="box day-box" id="date5-box">
+                    <div class="title txt">
+                        <span id="date5">Loading...</span>
+                    </div>
+                    <div class="weather-box">
+                        <div class="weather-icon">
+                            <i id="icon5" class="fa fa-spinner fa-spin"></i>
+                        </div>
+                        <div class="weather-description">
+                            <span id="weatherDescription5">Loading...</span>
+                        </div>
+                        <div class="weather-temperature">
+                            <span class="temp-texts main-temp">
+                                <span class="temp" id="temperature5">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>Feels Like: </span>
+                                <span>
+                                    <span id="feels-like5">Loading...</span>
+                                    <span> °C</span>
+                                </span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>L: </span>
+                                <span id="min-temp5">Loading...</span>
+                                <span> °C</span>
+                                <span>|</span>
+                                <span class="left-text">H: </span>
+                                <span id="max-temp5">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="box day-box" id="date3-box">
+                    <div class="title txt">
+                        <span id="date3">Loading...</span>
+                    </div>
+                    <div class="weather-box">
+                        <div class="weather-icon">
+                            <i id="icon3" class="fa fa-spinner fa-spin"></i>
+                        </div>
+                        <div class="weather-description">
+                            <span id="weatherDescription3">Loading...</span>
+                        </div>
+                        <div class="weather-temperature">
+                            <span class="temp-texts main-temp">
+                                <span class="temp" id="temperature3">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>Feels Like: </span>
+                                <span>
+                                    <span id="feels-like3">Loading...</span>
+                                    <span> °C</span>
+                                </span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>L: </span>
+                                <span id="min-temp3">Loading...</span>
+                                <span> °C</span>
+                                <span>|</span>
+                                <span class="left-text">H: </span>
+                                <span id="max-temp3">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="box day-box" id="date6-box">
+                    <div class="title txt">
+                        <span id="date6">Loading...</span>
+                    </div>
+                    <div class="weather-box">
+                        <div class="weather-icon">
+                            <i id="icon6" class="fa fa-spinner fa-spin"></i>
+                        </div>
+                        <div class="weather-description">
+                            <span id="weatherDescription6">Loading...</span>
+                        </div>
+                        <div class="weather-temperature">
+                            <span class="temp-texts main-temp">
+                                <span class="temp" id="temperature6">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>Feels Like: </span>
+                                <span>
+                                    <span id="feels-like6">Loading...</span>
+                                    <span> °C</span>
+                                </span>
+                            </span>
+                            <span class="temp-texts">
+                                <span>L: </span>
+                                <span id="min-temp6">Loading...</span>
+                                <span> °C</span>
+                                <span>|</span>
+                                <span class="left-text">H: </span>
+                                <span id="max-temp6">Loading...</span>
+                                <span> °C</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <a href="https://github.com/YousefElGhoul/weather" target="_blank">
+              <i class="fa-brands fab fa-github"></i>
+              Repo
+            </a>
+            <a href="https://weather-api.yousefelghoul.me/swagger-ui/index.html">
+                <i class="fa-solid fa-gear"></i>
+                API
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // On load
+        window.onload = () => {
+            updateClock();
+            updateDates();
+            updateWeather();
+        }
+    </script>
+</body>
+</html> 
