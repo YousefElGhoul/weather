@@ -1,5 +1,6 @@
 package com.ghoul.weather.controllers;
 
+import com.ghoul.weather.config.CloudflareIpRanges;
 import com.ghoul.weather.model.dto.MiniWeatherResponse;
 import com.ghoul.weather.model.dto.WeatherResponse;
 import com.ghoul.weather.services.WeatherService;
@@ -8,8 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,10 +17,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/api/v1")
 public class WeatherController {
 
-    private final WeatherService weatherService;
+    private static final String CF_CONNECTING_IP = "CF-Connecting-IP";
 
-    public WeatherController(WeatherService weatherService) {
+    private final WeatherService weatherService;
+    private final CloudflareIpRanges cloudflareIpRanges;
+
+    public WeatherController(WeatherService weatherService, CloudflareIpRanges cloudflareIpRanges) {
         this.weatherService = weatherService;
+        this.cloudflareIpRanges = cloudflareIpRanges;
     }
 
     @GetMapping(path = "/mini-weather")
@@ -46,12 +49,13 @@ public class WeatherController {
 
     private String resolveClientIp(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
-        if (ip == null || ip.isBlank() || !ip.matches("[0-9a-fA-F:.]+")) {
-            throw new InvalidClientDataException("A valid client IP address is required.");
+        // Behind Cloudflare the resolved address is a Cloudflare edge server, so use the
+        // visitor's address Cloudflare forwards. Only trusted when the request really came from Cloudflare.
+        String cloudflareClientIp = request.getHeader(CF_CONNECTING_IP);
+        if (cloudflareClientIp != null && !cloudflareClientIp.isBlank() && cloudflareIpRanges.contains(ip)) {
+            ip = cloudflareClientIp.trim();
         }
-        try {
-            InetAddress.getByName(ip);
-        } catch (UnknownHostException ex) {
+        if (CloudflareIpRanges.parseLiteral(ip) == null) {
             throw new InvalidClientDataException("A valid client IP address is required.");
         }
         return ip;

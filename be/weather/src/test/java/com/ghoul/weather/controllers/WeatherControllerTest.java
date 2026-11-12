@@ -1,6 +1,8 @@
 package com.ghoul.weather.controllers;
 
+import com.ghoul.weather.config.CloudflareIpRanges;
 import com.ghoul.weather.exceptions.GlobalExceptionHandler;
+import java.util.List;
 import com.ghoul.weather.exceptions.UpstreamTimeoutException;
 import com.ghoul.weather.model.dto.MiniWeatherResponse;
 import com.ghoul.weather.services.WeatherService;
@@ -21,7 +23,8 @@ class WeatherControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new WeatherController(weatherService))
+        CloudflareIpRanges cloudflareIpRanges = new CloudflareIpRanges(List.of("162.158.0.0/15", "2400:cb00::/32"));
+        mockMvc = MockMvcBuilders.standaloneSetup(new WeatherController(weatherService, cloudflareIpRanges))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
@@ -46,6 +49,53 @@ class WeatherControllerTest {
                 .andExpect(jsonPath("$.status").value(504))
                 .andExpect(jsonPath("$.error").value("Upstream timeout"))
                 .andExpect(jsonPath("$.path").value("/api/v1/mini-weather"));
+    }
+
+    @Test
+    void usesCfConnectingIpWhenRequestComesFromCloudflare() throws Exception {
+        when(weatherService.getMiniWeather("156.223.38.59")).thenReturn(new MiniWeatherResponse("Clear Sky", 25.0));
+
+        mockMvc.perform(get("/api/v1/mini-weather").header("CF-Connecting-IP", "156.223.38.59")
+                        .with(request -> { request.setRemoteAddr("162.158.1.20"); return request; }))
+                .andExpect(status().isOk());
+        verify(weatherService).getMiniWeather("156.223.38.59");
+    }
+
+    @Test
+    void usesCfConnectingIpWhenRequestComesFromCloudflareOverIpv6() throws Exception {
+        when(weatherService.getMiniWeather("156.223.38.59")).thenReturn(new MiniWeatherResponse("Clear Sky", 25.0));
+
+        mockMvc.perform(get("/api/v1/mini-weather").header("CF-Connecting-IP", "156.223.38.59")
+                        .with(request -> { request.setRemoteAddr("2400:cb00:2048:1::c629:d7a2"); return request; }))
+                .andExpect(status().isOk());
+        verify(weatherService).getMiniWeather("156.223.38.59");
+    }
+
+    @Test
+    void ignoresCfConnectingIpWhenRequestDoesNotComeFromCloudflare() throws Exception {
+        when(weatherService.getMiniWeather("203.0.113.4")).thenReturn(new MiniWeatherResponse("Clear Sky", 25.0));
+
+        mockMvc.perform(get("/api/v1/mini-weather").header("CF-Connecting-IP", "198.51.100.7")
+                        .with(request -> { request.setRemoteAddr("203.0.113.4"); return request; }))
+                .andExpect(status().isOk());
+        verify(weatherService).getMiniWeather("203.0.113.4");
+    }
+
+    @Test
+    void usesRemoteAddressFromCloudflareWithoutHeader() throws Exception {
+        when(weatherService.getMiniWeather("162.158.1.20")).thenReturn(new MiniWeatherResponse("Clear Sky", 25.0));
+
+        mockMvc.perform(get("/api/v1/mini-weather").with(request -> { request.setRemoteAddr("162.158.1.20"); return request; }))
+                .andExpect(status().isOk());
+        verify(weatherService).getMiniWeather("162.158.1.20");
+    }
+
+    @Test
+    void rejectsInvalidCfConnectingIpFromCloudflare() throws Exception {
+        mockMvc.perform(get("/api/v1/mini-weather").header("CF-Connecting-IP", "not-an-ip")
+                        .with(request -> { request.setRemoteAddr("162.158.1.20"); return request; }))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(weatherService);
     }
 
     @Test
