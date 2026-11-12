@@ -1,14 +1,15 @@
 <!--
 ---
 portfolio:
-  title: "Weather API"
-  subtitle: "Location-Aware Weather Backend"
-  type: 
+  title: "Weather"
+  subtitle: "Location-Aware Weather API and Dashboard"
+  type:
     - Backend
+    - Web
   status: "Maintained"
   time: "2026"
 
-  description: "A Spring Boot weather service that resolves approximate client location, retrieves current conditions and forecasts from external providers, and exposes a frontend-friendly REST API with caching and structured error handling."
+  description: "A Spring Boot weather service that resolves approximate client location, retrieves current conditions and forecasts from external providers, and exposes a frontend-friendly REST API with caching and structured error handling, paired with a lightweight dashboard that shows current conditions and a weekly forecast."
 
   skills:
     - Java
@@ -22,100 +23,38 @@ portfolio:
     - JUnit
     - GitHub Actions
     - Google Cloud Run
+    - JavaScript
+    - HTML
+    - CSS
+    - GitHub Pages
 
-  live: "https://weather-api.yousefelghoul.me/swagger-ui.html"
+  live: "https://yousefelghoul.dev/weather/"
   slug: "weather-api"
 ---
 -->
 
-# Weather API
+# Weather
 
-A production-minded Spring Boot API for a weather UI. It resolves the caller's approximate location from their network address, retrieves current conditions and a six-day forecast, and returns a frontend-friendly JSON response.
+A location-aware weather API and the dashboard that uses it.
 
-## Highlights
+| Part | Path | Stack | Live |
+|---|---|---|---|
+| API | [`be/weather`](be/weather) | Java 21, Spring Boot, Docker, Cloud Run | [Swagger UI](https://weather-api.yousefelghoul.me/swagger-ui/index.html) |
+| Dashboard | [`fe`](fe) | HTML, CSS, JavaScript, GitHub Pages | [yousefelghoul.dev/weather](https://yousefelghoul.dev/weather/) |
 
-- IP-based approximate geolocation through ip-api.com and weather from OpenWeatherMap One Call API 3.0
-- Current conditions plus a six-day forecast in metric units
-- Consistent JSON errors for invalid client data, provider failures, timeouts, and unexpected errors
-- Bounded, 10-minute in-memory cache for successful weather-provider responses; it never stores client IPs
-- OpenAPI documentation, Swagger UI, unit tests, and MVC tests that never call external providers
+## How it fits together
 
-## Architecture
+The dashboard calls `GET /api/v1/full-weather`. The API resolves the caller's approximate location from their network address, fetches current conditions and a six-day forecast from OpenWeatherMap, and returns one frontend-friendly JSON response.
 
-`WeatherController` obtains the address exposed by Spring's forwarded-header support and delegates to `WeatherService`. The service uses `GeolocationService` and the two HTTP clients, validates provider payloads, then maps provider DTOs to public API DTOs. Successful OpenWeatherMap payloads are cached locally by rounded coordinates. Entries expire after 10 minutes and are limited to 1,000.
+## Deployment
 
-## Requirements and local setup
+Each part deploys by itself when its folder changes on `main`:
 
-- Java 21
-- An OpenWeatherMap One Call API 3.0 key
+- `be/weather/**` runs [`deploy-cloud-run.yml`](.github/workflows/deploy-cloud-run.yml): tests, Docker Hub image push, Cloud Run deploy.
+- `fe/**` runs [`deploy-pages.yml`](.github/workflows/deploy-pages.yml): publishes the folder to GitHub Pages.
 
-The application uses Spring Boot **4.0.5**, Java 21, Maven, Spring MVC, Spring Cache/Caffeine, and springdoc-openapi 3.0.2.
+See each folder's README for setup and details.
 
-```bash
-cp .env.example .env
-set -a; source .env; set +a
-./mvnw spring-boot:run
-```
+## License
 
-| Variable | Required | Description |
-|---|---:|---|
-| `OWM_API_KEY` | Yes | OpenWeatherMap One Call API 3.0 key |
-
-`OWM_API_KEY` is intentionally not stored in source control. `.env` is ignored by Git and only helps export it locally. Local loopback requests do not represent a public location; use a real client/proxy address when manually exercising geolocation.
-
-## API documentation
-
-- Swagger UI: [`/swagger-ui/index.html`](http://localhost:8080/swagger-ui/index.html)
-- OpenAPI document: [`/v3/api-docs`](http://localhost:8080/v3/api-docs)
-
-All public endpoints are `GET` endpoints under `/api/v1`.
-
-| Endpoint | Description |
-|---|---|
-| `/api/v1/mini-weather` | Current temperature and condition for the caller's approximate location |
-| `/api/v1/full-weather` | Current details plus six forecast days for the caller's approximate location |
-
-```bash
-curl http://localhost:8080/api/v1/mini-weather
-```
-
-```json
-{"description":"Clear Sky","temperature":28.5}
-```
-
-Error responses have one consistent shape:
-
-```json
-{"timestamp":"2026-08-26T15:00:00Z","status":504,"error":"Upstream timeout","message":"The weather provider did not respond in time.","path":"/api/v1/mini-weather"}
-```
-
-| Status | Meaning |
-|---:|---|
-| 200 | Weather response returned |
-| 400 | Missing or invalid client address |
-| 502 | A provider returned an invalid response or failed |
-| 504 | A provider did not respond before the configured timeout |
-| 500 | Unexpected server error |
-
-## Tests
-
-```bash
-./mvnw verify
-```
-
-Tests mock service/provider boundaries and require neither an API key nor network access.
-
-## Docker
-
-```bash
-docker build -t weather-api .
-docker run --rm -p 8080:8080 -e OWM_API_KEY=your-key weather-api
-```
-
-The image runs as a non-root `spring` user. Its build stage executes the test suite before producing the runtime image.
-
-## CI and deployment
-
-GitHub Actions runs `./mvnw -B verify`, builds the image, and pushes it to the public Docker Hub repository `<DOCKERHUB_USERNAME>/weather-api` before deploying it to Cloud Run. The workflow requires `GCP_PROJECT_ID`, `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, `CLOUD_RUN_SERVICE_NAME`, `WIF_PROVIDER`, `WIF_SERVICE_ACCOUNT`, and `OWM_API_KEY` GitHub secrets. `DOCKERHUB_TOKEN` should be a Docker Hub access token with write access to the repository; do not use an account password. Deployment to Cloud Run continues to use Workload Identity Federation, with `GCP_PROJECT_ID` explicitly selecting the target project.
-
-Geolocation is approximate and can reflect VPN or ISP routing. CORS defaults target the existing frontend and local development; adjust them for another frontend domain.
+[MIT](LICENSE.md)
