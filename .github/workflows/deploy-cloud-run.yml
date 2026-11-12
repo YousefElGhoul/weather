@@ -66,7 +66,42 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
-        run: docker build --provenance=false -t ${{ env.IMAGE }} . && docker push ${{ env.IMAGE }}
+        id: push
+        run: |
+          set -euo pipefail
+          docker build --provenance=false -t "$IMAGE" .
+          docker push "$IMAGE" | tee push.log
+          digest=$(grep -oE 'sha256:[a-f0-9]{64}' push.log | tail -1)
+          [ -n "$digest" ] || { echo "Could not read the pushed image digest"; exit 1; }
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      # Cloud Run pulls Docker Hub images through the mirror.gcr.io cache and
+      # fails with "not found" while a freshly pushed image is not cached yet.
+      # Pull the manifest and every blob through the mirror until all of them
+      # are served, then deploy that exact digest.
+      - name: Wait for the image on mirror.gcr.io
+        env:
+          MIRROR: https://mirror.gcr.io/v2/${{ secrets.DOCKERHUB_USERNAME }}/weather-api
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          set -uo pipefail
+          accept='Accept: application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json'
+          for attempt in $(seq 1 40); do
+            ready=true
+            if curl -sf -H "$accept" -o manifest.json "$MIRROR/manifests/$DIGEST"; then
+              for blob in $(jq -r '.config.digest, .layers[].digest' manifest.json); do
+                code=$(curl -s -L -o /dev/null -w '%{http_code}' "$MIRROR/blobs/$blob")
+                [ "$code" = "200" ] || { ready=false; echo "attempt $attempt: blob ${blob:7:12} -> $code"; }
+              done
+            else
+              ready=false
+              echo "attempt $attempt: manifest not served yet"
+            fi
+            if $ready; then echo "Image is fully served by the mirror"; exit 0; fi
+            sleep 15
+          done
+          echo "The mirror did not serve the image within 10 minutes"
+          exit 1
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
@@ -80,7 +115,7 @@ jobs:
         with:
           service: ${{ secrets.CLOUD_RUN_SERVICE_NAME }}
           region: ${{ env.REGION }}
-          image: ${{ env.IMAGE }}
+          image: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/weather-api@${{ steps.push.outputs.digest }}
           flags: --allow-unauthenticated
           port: 8080
           env_vars: |
