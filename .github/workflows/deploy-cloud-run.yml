@@ -66,7 +66,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
-        run: docker build -t ${{ env.IMAGE }} . && docker push ${{ env.IMAGE }}
+        run: docker build --provenance=false -t ${{ env.IMAGE }} . && docker push ${{ env.IMAGE }}
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
